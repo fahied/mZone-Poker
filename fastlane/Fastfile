@@ -42,7 +42,7 @@ def prepare_sigh()
 end
 
 def prepare_gym()
-  #ad-hoc
+  #params
   time = Time.new.strftime("%Y-%m-%d %H-%M-%S")
   #versionNumber = increment_version_number
   versionNumber = get_version_number
@@ -52,9 +52,10 @@ def prepare_gym()
   #buildNumber = lane_context[:BUILD_NUMBER]
   contentPath = "#{PACKAGE_PATH}/#{time}"
   outputName = "#{SCHEME} #{versionNumber}(#{buildNumber})"
-  adhocName = "AdHoc #{outputName}"
   archivePath = "#{contentPath}/#{outputName}"
   
+  #ad-hoc
+  adhocName = "AdHoc #{outputName}"
   gym(
     scheme: SCHEME,
     export_method: 'ad-hoc',
@@ -96,6 +97,25 @@ end
 
 def changeName(oldName, newName)
   sh "mv \'#{oldName}\' \'#{newName}\'"
+end
+
+def prepare_git() 
+  #branch develop
+  ensure_git_branch(
+    branch: 'develop'
+  )
+
+  #pull
+  sh "git pull --recurse-submodules"
+  sh "git submodule update --recursive"
+
+  #branch clean
+  ensure_git_status_clean
+  
+end
+
+def commit_git()
+
 end
 
 platform :ios do
