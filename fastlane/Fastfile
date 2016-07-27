@@ -80,10 +80,10 @@ def prepare_gym()
 
   #dispatch fir
   adhocIPAPath = "#{contentPath}/#{adhocName}.ipa"
-  sh "fir publish \'#{adhocIPAPath}\' --token d403b8dc26aa470edbfd2844cb48399a"
+  #sh "fir publish \'#{adhocIPAPath}\' --token d403b8dc26aa470edbfd2844cb48399a"
 
   #dispatch appstore
-  pilot
+  #pilot
   #pilot(
   #  skip_submission: true,
   #  skip_waiting_for_build_processing: true
@@ -120,7 +120,7 @@ def commit_git()
 
   #commit
   git_commit(
-    path: ["./#{PROJECT_NAME}/info.plist", "./#{PROJECT_TESTS_NAME}/info.plist", "./#{PROJECT_NAME}.xcodeproj/project.pbxproj"],
+    path: ["./#{PROJECT_NAME}/Info.plist", "./#{PROJECT_TESTS_NAME}/Info.plist", "./#{PROJECT_NAME}.xcodeproj/project.pbxproj"],
     message: "version"
   )
 
@@ -145,10 +145,14 @@ platform :ios do
     #update sigh
     #prepare_sigh()
 
+    #update git
     prepare_git()
 
     #gym
-    #prepare_gym()
+    prepare_gym()
+
+    #commit
+    commit_git()
     
   end
 
