@@ -110,7 +110,7 @@ def prepare_git()
   sh "git submodule update --recursive"
 
   #branch clean
-  ensure_git_status_clean
+  #ensure_git_status_clean
   
 end
 
@@ -130,8 +130,10 @@ platform :ios do
     #update sigh
     #prepare_sigh()
 
+    prepare_git()
+
     #gym
-    prepare_gym()
+    #prepare_gym()
     
   end
 
