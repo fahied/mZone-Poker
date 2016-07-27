@@ -1,3 +1,5 @@
+#!/usr/bin/ruby
+
 # Customise this file, documentation can be found here:
 # https://github.com/fastlane/fastlane/tree/master/fastlane/docs
 # All available actions: https://github.com/fastlane/fastlane/blob/master/fastlane/docs/Actions.md
@@ -15,11 +17,108 @@ fastlane_version "1.97.2"
 
 default_platform :ios
 
+PROVISION_PROFILE_PATH = './fastlane/provision'
+
+SCHEME = 'mZone Poker'
+HOME_PATH = ENV['HOME']
+PACKAGE_PATH = "#{HOME_PATH}/Desktop/#{SCHEME} Package"
+
+def prepare_sigh()
+
+  #sign ad-hoc
+  sigh(
+    adhoc: true,
+    output_path: PROVISION_PROFILE_PATH
+    #filename: PROVISION_PROFILE_PATH
+  )
+
+  #sign app-store
+  sigh(
+    adhoc: false,
+    output_path: PROVISION_PROFILE_PATH
+    #filename: PROVISION_PROFILE_PATH
+  )
+
+end
+
+def prepare_gym()
+  #ad-hoc
+  time = Time.new.strftime("%Y-%m-%d %H-%M-%S")
+  #versionNumber = increment_version_number
+  versionNumber = get_version_number
+  buildNumber = increment_build_number
+  #get_build_number
+  #increment_build_number
+  #buildNumber = lane_context[:BUILD_NUMBER]
+  contentPath = "#{PACKAGE_PATH}/#{time}"
+  outputName = "#{SCHEME} #{versionNumber}(#{buildNumber})"
+  adhocName = "AdHoc #{outputName}"
+  archivePath = "#{contentPath}/#{outputName}"
+  
+  gym(
+    scheme: SCHEME,
+    export_method: 'ad-hoc',
+    #build_path: ARCHIVES_PATH,
+    output_directory: contentPath,
+    output_name: adhocName,
+    archive_path: archivePath
+  )
+
+  #app-store
+  appstoreName = "AppStore #{outputName}"
+  gym(
+    scheme: SCHEME,
+    export_method: 'app-store',
+    output_directory: contentPath,
+    output_name: appstoreName,
+    archive_path:  archivePath,
+    skip_build_archive: true
+  )
+
+  #dispatch fir
+  adhocIPAPath = "#{contentPath}/#{adhocName}.ipa"
+  sh "fir publish \'#{adhocIPAPath}\' --token d403b8dc26aa470edbfd2844cb48399a"
+
+  #dispatch appstore
+  pilot
+  #pilot(
+  #  skip_submission: true,
+  #  skip_waiting_for_build_processing: true
+  #)
+
+  #change name
+  dSYMPathAdHoc = "#{contentPath}/#{adhocName}.app.dSYM.zip"
+  dSYMPathAppStore = "#{contentPath}/#{appstoreName}.app.dSYM.zip"
+  newPath = "#{contentPath}/#{outputName}.app.dSYM.zip"
+  #changeName(dSYMPathAdHoc, newPath)
+  #changeName(dSYMPathAppStore, newPath)
+end
+
+def changeName(oldName, newName)
+  sh "mv \'#{oldName}\' \'#{newName}\'"
+end
+
 platform :ios do
   before_all do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
     
     
+  end
+
+  desc 'package'
+  lane :package do
+    #update sigh
+    #prepare_sigh()
+
+    #gym
+    prepare_gym()
+    
+  end
+
+  desc "ruby practise"
+  lane :helloRuby do
+    puts(PROVISION_PROFILE_PATH)
+    puts(ARCHIVES_PATH)
   end
 
   desc "provision"

@@ -6,6 +6,16 @@ sudo gem install fastlane
 ```
 # Available Actions
 ## iOS
+### ios package
+```
+fastlane ios package
+```
+package
+### ios helloRuby
+```
+fastlane ios helloRuby
+```
+ruby practise
 ### ios provision
 ```
 fastlane ios provision
