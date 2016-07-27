@@ -20,6 +20,8 @@ default_platform :ios
 PROVISION_PROFILE_PATH = './fastlane/provision'
 
 SCHEME = 'mZone Poker'
+PROJECT_NAME = 'mZone Poker'
+PROJECT_TESTS_NAME = "#{PROJECT_NAME}UITests"
 HOME_PATH = ENV['HOME']
 PACKAGE_PATH = "#{HOME_PATH}/Desktop/#{SCHEME} Package"
 
@@ -116,6 +118,19 @@ end
 
 def commit_git()
 
+  #commit
+  git_commit(
+    path: ["./#{PROJECT_NAME}/info.plist", "./#{PROJECT_TESTS_NAME}/info.plist", "./#{PROJECT_NAME}.xcodeproj/project.pbxproj"],
+    message: "version"
+  )
+
+  #push
+  push_to_git_remote(
+    remote: 'origin',
+    local_branch: 'develop',
+    remote_branch: 'develop',
+  )
+  
 end
 
 platform :ios do
