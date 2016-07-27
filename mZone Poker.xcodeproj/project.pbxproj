@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B61E3C531D48DB8000AF774C /* OCViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B61E3C521D48DB8000AF774C /* OCViewController.m */; };
 		B6E92FF51D45F9D8007B1AFD /* mZone_PokerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E92FF41D45F9D8007B1AFD /* mZone_PokerUITests.swift */; };
 		B6E92FFD1D460025007B1AFD /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E92FFC1D460025007B1AFD /* SnapshotHelper.swift */; };
 		EC9527461B8043450098D609 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC9527451B8043450098D609 /* AppDelegate.swift */; };
@@ -28,6 +29,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B61E3C501D48DB7F00AF774C /* mZone Poker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "mZone Poker-Bridging-Header.h"; sourceTree = "<group>"; };
+		B61E3C511D48DB8000AF774C /* OCViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OCViewController.h; sourceTree = "<group>"; };
+		B61E3C521D48DB8000AF774C /* OCViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCViewController.m; sourceTree = "<group>"; };
 		B6E92FF21D45F9D8007B1AFD /* mZone PokerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "mZone PokerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6E92FF41D45F9D8007B1AFD /* mZone_PokerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mZone_PokerUITests.swift; sourceTree = "<group>"; };
 		B6E92FF61D45F9D8007B1AFD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -99,6 +103,9 @@
 				EC95274C1B8043450098D609 /* Assets.xcassets */,
 				EC95274E1B8043450098D609 /* LaunchScreen.storyboard */,
 				EC9527511B8043450098D609 /* Info.plist */,
+				B61E3C511D48DB8000AF774C /* OCViewController.h */,
+				B61E3C521D48DB8000AF774C /* OCViewController.m */,
+				B61E3C501D48DB7F00AF774C /* mZone Poker-Bridging-Header.h */,
 			);
 			path = "mZone Poker";
 			sourceTree = "<group>";
@@ -217,6 +224,7 @@
 			files = (
 				EC9527481B8043450098D609 /* ViewController.swift in Sources */,
 				EC9527461B8043450098D609 /* AppDelegate.swift in Sources */,
+				B61E3C531D48DB8000AF774C /* OCViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,13 +380,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Hangzhou Yunti Technology Co. Ltd. (2KT364D29M)";
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				INFOPLIST_FILE = "mZone Poker/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.yunti.Disk-Monster";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "8419fdb4-52b0-41c2-a696-0b98f4d32f95";
+				SWIFT_OBJC_BRIDGING_HEADER = "mZone Poker/mZone Poker-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -387,13 +398,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Hangzhou Yunti Technology Co. Ltd. (2KT364D29M)";
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				INFOPLIST_FILE = "mZone Poker/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.yunti.Disk-Monster";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "8419fdb4-52b0-41c2-a696-0b98f4d32f95";
+				SWIFT_OBJC_BRIDGING_HEADER = "mZone Poker/mZone Poker-Bridging-Header.h";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
