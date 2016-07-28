@@ -68,14 +68,13 @@ def path_params_factor(exportMethod)
   #params
   time = Time.new.strftime("%Y-%m-%d %H-%M-%S")
   versionNumber = get_version_number
-  buildNumber = increment_build_number
+  buildNumber = get_build_number
 
   #gym params
   outputDirectory = "#{PACKAGE_PATH}/#{time}"
   archiveName = "#{SCHEME} #{versionNumber}(#{buildNumber})"
   outputName = "#{exportMethod} #{archiveName}"
   archivePath = "#{outputDirectory}/#{archiveName}"
-
 
   return outputDirectory, outputName, archivePath
 end
@@ -138,7 +137,7 @@ def package_appstore(appType, serverType)
   outputDirectory = params[1]
   outputName = params[2]
   archivePath = params[3]
-  commitInfo = generate_commitInfo(appType, serverType)
+  commitInfo = generate_commit_info(appType, serverType)
   upload_appstore(appstoreIPAPath, commitInfo)
 end
 
@@ -159,7 +158,7 @@ def package_All(appType, serverType)
 
   #upload appstore
   appstoreIPAPath = params[0]
-  commitInfo = generate_commitInfo(appType, serverType)
+  commitInfo = generate_commit_info(appType, serverType)
   upload_appstore(appstoreIPAPath, commitInfo)
 end
 
@@ -169,6 +168,7 @@ end
 
 def upload_appstore(appstoreIPAPath, changelog)
   #dispatch appstore
+  puts changelog
   pilot(
     ipa: appstoreIPAPath,
     changelog: changelog,
@@ -179,8 +179,8 @@ def upload_appstore(appstoreIPAPath, changelog)
   #)
 end
 
-def generate_commitInfo(appType, serverType)
-  scriptName = "打包脚本: xxxx\n"
+def generate_commit_info(appType, serverType)
+  scriptName = "打包脚本: \tfastlane\n"
 
   appTypeName = ""
   case appType
@@ -195,20 +195,24 @@ def generate_commitInfo(appType, serverType)
   serverName = ""
   case serverType
   when ServerType::Local
-    serverName = "服务器: \t\t本地 Local\n"
+    serverName = "服务器:  \t\t本地 Local\n"
   when ServerType::Daily
-    serverName = "服务器: \t\t日常 Daily\n"
+    serverName = "服务器:  \t\t日常 Daily\n"
   when ServerType::Prepub
-    serverName = "服务器: \t\t预发 Prepub\n"
+    serverName = "服务器:  \t\t预发 Prepub\n"
   when ServerType::Production
-    serverName = "服务器: \t\t线上 Production\n"
+    serverName = "服务器:  \t\t线上 Production\n"
   end
 
   branchName = git_branch
   branchName = "当前分支: \t#{branchName}\n"
 
-  userInfo = "打包操作: xxxx\n"
-  changelog = "更新日志: \n xxxx \n"
+  userName = sh "git config --get user.name"
+  userEmail = sh "git config --get user.email"
+  userInfo = "打包操作: \t#{userName} #{userEmail}\n"
+
+  changeText = sh "cat ../changelog"
+  changelog = "\n更新日志: \n#{changeText}\n"
 
   commitInfo = "#{scriptName}#{appTypeName}#{serverName}#{branchName}#{userInfo}#{changelog}"
 end
@@ -258,11 +262,12 @@ platform :ios do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
     
     #update sigh
-    prepare_sigh()
+    #prepare_sigh()
 
     #update git
-    prepare_git()
+    #prepare_git()
     
+    #increment_build_number
   end
 
   desc "deply a prepub version to adhoc"
@@ -294,8 +299,9 @@ platform :ios do
   lane :helloRuby do
     #puts(PROVISION_PROFILE_PATH)
     #puts(ARCHIVES_PATH)
-    #params_factor(Export_Method::Ad_Hoc, AppType::Beta, ServerType::Prepub)
-    export_package(AppType::Beta, ServerType::Prepub)
+    #params_factor(ExportMethod::AdHoc, AppType::Beta, ServerType::Prepub)
+    #export_package(AppType::Beta, ServerType::Prepub)
+    puts generate_commit_info(AppType::Beta, ServerType::Prepub)
   end
 
   desc "provision"
@@ -355,7 +361,7 @@ platform :ios do
     # This block is called, only if the executed lane was successful
     
     #push
-    push_commit_to_remote()
+    #push_commit_to_remote()
 
     # slack(
     #   message: "Successfully deployed new App Update."
