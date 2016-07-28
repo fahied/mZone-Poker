@@ -17,6 +17,27 @@ fastlane_version "1.97.2"
 
 default_platform :ios
 
+#app type
+module AppType
+  Development = 0
+  Beta = 1
+  Production = 2
+end
+
+#server type
+module ServerType
+  Local = 0
+  Daily = 1
+  Prepub = 2
+  Production = 3
+end
+
+module ExportMethod
+  AdHoc = 'ad-hoc'
+  AppStore = 'app-store'
+end
+
+#constants
 PROVISION_PROFILE_PATH = './fastlane/provision'
 
 SCHEME = 'mZone Poker'
@@ -43,58 +64,152 @@ def prepare_sigh()
 
 end
 
-def prepare_gym()
+def path_params_factor(exportMethod)
   #params
   time = Time.new.strftime("%Y-%m-%d %H-%M-%S")
-  #versionNumber = increment_version_number
   versionNumber = get_version_number
   buildNumber = increment_build_number
-  #get_build_number
-  #increment_build_number
-  #buildNumber = lane_context[:BUILD_NUMBER]
-  contentPath = "#{PACKAGE_PATH}/#{time}"
-  outputName = "#{SCHEME} #{versionNumber}(#{buildNumber})"
-  archivePath = "#{contentPath}/#{outputName}"
-  
-  #ad-hoc
-  adhocName = "AdHoc #{outputName}"
-  gym(
+
+  #gym params
+  outputDirectory = "#{PACKAGE_PATH}/#{time}"
+  archiveName = "#{SCHEME} #{versionNumber}(#{buildNumber})"
+  outputName = "#{exportMethod} #{archiveName}"
+  archivePath = "#{outputDirectory}/#{archiveName}"
+
+
+  return outputDirectory, outputName, archivePath
+end
+
+def export_package(exportMethod, appType, serverType)
+
+  outputDirectory, outputName, archivePath = path_params_factor(exportMethod)
+
+  ipaPath = gym(
     scheme: SCHEME,
-    export_method: 'ad-hoc',
-    #build_path: ARCHIVES_PATH,
-    output_directory: contentPath,
-    output_name: adhocName,
-    archive_path: archivePath
+    export_method: exportMethod,
+    output_directory: outputDirectory,
+    output_name: outputName,
+    archive_path: archivePath,
+    xcargs: "GCC_PREPROCESSOR_DEFINITIONS='YT_APP_TYPE=#{appType} YT_SERVER=#{serverType}'"
   )
 
-  #app-store
-  appstoreName = "AppStore #{outputName}"
+  return [ipaPath, outputDirectory, outputName, archivePath]
+end
+
+def export_adhoc(appType, serverType)
+   export_package(ExportMethod::AdHoc, appType, serverType)
+end
+
+def export_appstore(appType, serverType)
+  export_package(ExportMethod::AppStore, appType, serverType)
+end
+
+def export_appstore_from_archive(outputDirectory, outputName, archivePath)
+
   gym(
     scheme: SCHEME,
-    export_method: 'app-store',
-    output_directory: contentPath,
-    output_name: appstoreName,
+    export_method: ExportMethod::AppStore,
+    output_directory: outputDirectory,
+    output_name: outputName,
     archive_path:  archivePath,
     skip_build_archive: true
   )
 
-  #dispatch fir
-  adhocIPAPath = "#{contentPath}/#{adhocName}.ipa"
-  #sh "fir publish \'#{adhocIPAPath}\' --token d403b8dc26aa470edbfd2844cb48399a"
+end
 
+def package_adhoc(appType, serverType)
+
+  params = export_adhoc(appType, serverType)
+
+  #upload fir
+  adhocIPAPath = params[0]
+  upload_fir(adhocIPAPath)
+
+end
+
+def package_appstore(appType, serverType)
+  
+  #export appstore
+  params = export_appstore(appType, serverType)
+
+  #upload appstore
+  appstoreIPAPath = params[0]
+  outputDirectory = params[1]
+  outputName = params[2]
+  archivePath = params[3]
+  commitInfo = generate_commitInfo(appType, serverType)
+  upload_appstore(appstoreIPAPath, commitInfo)
+end
+
+def package_All(appType, serverType)
+
+  #export adhoc
+  params = export_adhoc(appType, serverType)
+
+  #export appstore
+  outputDirectory = params[1]
+  outputName = params[2]
+  archivePath = params[3]
+  export_appstore_from_archivePath(outputDirectory, outputName, archivePath)
+
+  #upload fir
+  adhocIPAPath = params[0]
+  upload_fir(adhocIPAPath)
+
+  #upload appstore
+  appstoreIPAPath = params[0]
+  commitInfo = generate_commitInfo(appType, serverType)
+  upload_appstore(appstoreIPAPath, commitInfo)
+end
+
+def upload_fir(adhocIPAPath)
+  sh "fir publish \'#{adhocIPAPath}\' --token d403b8dc26aa470edbfd2844cb48399a"
+end
+
+def upload_appstore(appstoreIPAPath, changelog)
   #dispatch appstore
-  #pilot
+  pilot(
+    ipa: appstoreIPAPath,
+    changelog: changelog,
+  )
   #pilot(
   #  skip_submission: true,
   #  skip_waiting_for_build_processing: true
   #)
+end
 
-  #change name
-  dSYMPathAdHoc = "#{contentPath}/#{adhocName}.app.dSYM.zip"
-  dSYMPathAppStore = "#{contentPath}/#{appstoreName}.app.dSYM.zip"
-  newPath = "#{contentPath}/#{outputName}.app.dSYM.zip"
-  #changeName(dSYMPathAdHoc, newPath)
-  #changeName(dSYMPathAppStore, newPath)
+def generate_commitInfo(appType, serverType)
+  scriptName = "打包脚本: xxxx\n"
+
+  appTypeName = ""
+  case appType
+  when AppType::Development
+    appTypeName = "应用类型: \t开发包 ApptypeDevelopment\n"
+  when AppType::Beta
+    appTypeName = "应用类型: \t测试包 AppTypeBeta\n"
+  when AppType::Production
+    appTypeName = "应用类型: \t正式包 AppTypeProduction\n"
+  end
+
+  serverName = ""
+  case serverType
+  when ServerType::Local
+    serverName = "服务器: \t\t本地 Local\n"
+  when ServerType::Daily
+    serverName = "服务器: \t\t日常 Daily\n"
+  when ServerType::Prepub
+    serverName = "服务器: \t\t预发 Prepub\n"
+  when ServerType::Production
+    serverName = "服务器: \t\t线上 Production\n"
+  end
+
+  branchName = get_branch
+  branchName = "当前分支: \t#{branchName}\n"
+
+  userInfo = "打包操作: xxxx\n"
+  changelog = "更新日志: \n xxxx \n"
+
+  commitInfo = "#{scriptName}#{appTypeName}#{serverName}#{branchName}#{userInfo}#{changelog}"
 end
 
 def changeName(oldName, newName)
@@ -116,7 +231,7 @@ def prepare_git()
   
 end
 
-def commit_git()
+def push_commit_to_remote()
 
   #commit
   git_commit(
@@ -133,33 +248,53 @@ def commit_git()
   
 end
 
+def checkout_changed_number
+    sh "git checkout \'../#{PROJECT_NAME}/Info.plist\' \'../#{PROJECT_TESTS_NAME}/Info.plist\' \'../#{PROJECT_NAME}.xcodeproj/project.pbxproj\'"
+end
+
 platform :ios do
   before_all do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
     
-    
-  end
-
-  desc 'package'
-  lane :package do
     #update sigh
-    #prepare_sigh()
+    prepare_sigh()
 
     #update git
     prepare_git()
-
-    #gym
-    prepare_gym()
-
-    #commit
-    commit_git()
     
+  end
+
+  desc "deply a prepub version to adhoc"
+  lane :prepub_adhoc do
+    package_adhoc(AppType::Beta, ServerType::Prepub)
+  end
+
+  desc "deply a production version to adhoc"
+  lane :production_adhoc do
+    package_adhoc(AppType::Beta, ServerType::Production)
+  end
+
+  desc "deply a prepub version to appstore"
+  lane :prepub_appstore do
+    package_appstore(AppType::Production, ServerType::Prepub)
+  end
+
+  desc "deploy a production to the appstore"
+  lane :production_appstore do
+    package_appstore(AppType::Production, ServerType::Production)
+  end
+
+  desc "deply a prepub version for both"
+  lane :package do
+    package_all(AppType::Beta, ServerType::Prepub)
   end
 
   desc "ruby practise"
   lane :helloRuby do
-    puts(PROVISION_PROFILE_PATH)
-    puts(ARCHIVES_PATH)
+    #puts(PROVISION_PROFILE_PATH)
+    #puts(ARCHIVES_PATH)
+    #params_factor(Export_Method::Ad_Hoc, AppType::Beta, ServerType::Prepub)
+    export_package(AppType::Beta, ServerType::Prepub)
   end
 
   desc "provision"
@@ -212,19 +347,14 @@ platform :ios do
     # You can also use other beta testing services here (run `fastlane actions`)
   end
 
-  desc "Deploy a new version to the App Store"
-  lane :appstore1 do
-    # match(type: "appstore")
-    # snapshot
-    gym(scheme: "mZone Poker") # Build your app - more options available
-    deliver(force: true)
-    # frameit
-  end
 
   # You can define as many lanes as you want
 
   after_all do |lane|
     # This block is called, only if the executed lane was successful
+    
+    #push
+    push_commit_to_remote()
 
     # slack(
     #   message: "Successfully deployed new App Update."
@@ -232,6 +362,9 @@ platform :ios do
   end
 
   error do |lane, exception|
+
+    #chekcout 
+    checkout_changed_number()
     # slack(
     #   message: exception.message,
     #   success: false

@@ -6,11 +6,31 @@ sudo gem install fastlane
 ```
 # Available Actions
 ## iOS
+### ios prepub_adhoc
+```
+fastlane ios prepub_adhoc
+```
+deply a prepub version to adhoc
+### ios production_adhoc
+```
+fastlane ios production_adhoc
+```
+deply a production version to adhoc
+### ios prepub_appstore
+```
+fastlane ios prepub_appstore
+```
+deply a prepub version to appstore
+### ios production_appstore
+```
+fastlane ios production_appstore
+```
+deploy a production to the appstore
 ### ios package
 ```
 fastlane ios package
 ```
-package
+deply a prepub version for both
 ### ios helloRuby
 ```
 fastlane ios helloRuby
@@ -53,11 +73,6 @@ fastlane ios beta
 Submit a new Beta Build to Apple TestFlight
 
 This will also make sure the profile is up to date
-### ios appstore1
-```
-fastlane ios appstore1
-```
-Deploy a new version to the App Store
 
 ----
 
