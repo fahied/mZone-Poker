@@ -90,7 +90,8 @@ def export_package(exportMethod, appType, serverType)
     output_directory: outputDirectory,
     output_name: outputName,
     archive_path: archivePath,
-    xcargs: "GCC_PREPROCESSOR_DEFINITIONS='YT_APP_TYPE=#{appType} YT_SERVER=#{serverType}'"
+    xcargs: "GCC_PREPROCESSOR_DEFINITIONS='YT_APP_TYPE=#{appType} YT_SERVER=#{serverType}'",
+    use_legacy_build_api: true
   )
 
   return [ipaPath, outputDirectory, outputName, archivePath]
@@ -203,7 +204,7 @@ def generate_commitInfo(appType, serverType)
     serverName = "服务器: \t\t线上 Production\n"
   end
 
-  branchName = get_branch
+  branchName = git_branch
   branchName = "当前分支: \t#{branchName}\n"
 
   userInfo = "打包操作: xxxx\n"
